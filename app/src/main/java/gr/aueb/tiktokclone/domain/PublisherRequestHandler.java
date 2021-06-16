@@ -1,22 +1,26 @@
 package gr.aueb.tiktokclone.domain;
 
+import android.os.AsyncTask;
+
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.IOException;
 import java.lang.Thread;
 
-public class PublisherRequestHandler implements Runnable {
-    private Publisher publisher;
+public class PublisherRequestHandler extends AsyncTask<Void, Void, Void> {
+    private final Publisher publisher;
     private ServerSocket server;
 
     private final int PORT;
 
     public PublisherRequestHandler(int port, Publisher publisher) {
+        super();
         PORT = port;
         this.publisher = publisher;
     }
 
-    public void run() {
+    @Override
+    protected Void doInBackground(Void... voids) {
         try {
             // Open a server socket
             server = new ServerSocket(PORT);
@@ -33,15 +37,15 @@ public class PublisherRequestHandler implements Runnable {
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
+        return null;
     }
 
-    public void close() {
+    @Override
+    protected void onPostExecute(Void unused) {
         try {
             server.close();
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            System.exit(0);
         }
     }
 

@@ -1,2 +1,3 @@
 rootProject.name = "TikTokClone"
 include ':app'
+include ':BrokerLibrary'

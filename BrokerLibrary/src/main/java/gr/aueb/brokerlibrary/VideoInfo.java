@@ -1,23 +1,20 @@
-package gr.aueb.tiktokclone.domain;
+package gr.aueb.brokerlibrary;
 
 import java.io.Serializable;
-import java.io.FileInputStream;
-import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.ArrayList;
 
-public class Video implements Serializable {
+public class VideoInfo implements Serializable {
     private String name;
     private String filename;
     private String channelName;
     private String dateCreated;
-    private String framerate;
+    private String frameRate;
     private String frameWidth;
     private String frameHeight;
     private List<String> associatedHashtags;
     
-    public Video(String name, String videosDir, String filename, String channelName) {
+    public VideoInfo(String name, String videosDir, String filename, String channelName) {
         this.name = name;
         this.filename = filename;
         this.channelName = channelName;
@@ -33,7 +30,7 @@ public class Video implements Serializable {
 //            MP4Parser.parse(inputstream, handler, metadata, pcontext);
 //
 //            dateCreated = metadata.get("meta:creation-date");
-//            // framerate = metadata.get("framerate");
+//            // frameRate = metadata.get("framerate");
 //            frameWidth = metadata.get("tiff:ImageWidth");
 //            frameHeight = metadata.get("tiff:ImageLength");
 //
@@ -61,8 +58,8 @@ public class Video implements Serializable {
         return dateCreated;
     }
 
-    public String getFramerate() {
-        return framerate;
+    public String getFrameRate() {
+        return frameRate;
     }
 
     public String getFrameWidth() {
@@ -73,8 +70,8 @@ public class Video implements Serializable {
         return frameHeight;
     }
 
-    public void setFramerate(String framerate) {
-        this.framerate = framerate;
+    public void setFrameRate(String frameRate) {
+        this.frameRate = frameRate;
     }
 
     public void setFrameWidth(String frameWidth) {

@@ -1,14 +1,13 @@
 package gr.aueb.tiktokclone.domain;
 
 import java.net.Socket;
-import java.util.List;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
 import java.io.IOException;
+import java.util.List;
 
-import gr.aueb.tiktokclone.domain.Chunk;
-import gr.aueb.tiktokclone.domain.Publisher;
-import gr.aueb.tiktokclone.domain.Video;
+import gr.aueb.brokerlibrary.Chunk;
+import gr.aueb.brokerlibrary.VideoInfo;
 
 public class VideoUploader implements Runnable {
     private Socket socket;
@@ -37,8 +36,8 @@ public class VideoUploader implements Runnable {
 
             // Find out whether the video exists
             boolean exists = false;
-            Video video = null;
-            for (Video v : publisher.getSavedVideos()) {
+            VideoInfo video = null;
+            for (VideoInfo v : publisher.getSavedVideos()) {
                 if (filename.equals(v.getFilename())) {
                     exists = true;
                     video = v;

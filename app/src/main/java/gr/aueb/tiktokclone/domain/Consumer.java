@@ -1,5 +1,7 @@
 package gr.aueb.tiktokclone.domain;
 
+import android.content.Context;
+
 import java.net.Socket;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
@@ -12,34 +14,39 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 
-import gr.aueb.tiktokclone.domain.Node;
-import gr.aueb.tiktokclone.domain.Video;
+import gr.aueb.brokerlibrary.ChannelName;
+import gr.aueb.brokerlibrary.Chunk;
+import gr.aueb.brokerlibrary.VideoInfo;
+import gr.aueb.brokerlibrary.Node;
 
 public class Consumer extends Node {
     private Socket socket;
     private ObjectOutputStream output;
     private ObjectInputStream input;
+    private final ConsumerSubscriptionsTimer timer;
 
     // Data
     private String channelName;
     private List<String> subscribedTopics;
-    private Map<Video, List<Chunk>> downloadedVideos;
+    private Map<VideoInfo, List<Chunk>> downloadedVideos;
 
     private final String DOWNLOADS_DIR;
 
-    public Consumer(String channelName) {
+    public Consumer(String channelName, Context context) {
         super();
         this.channelName = channelName;
         this.subscribedTopics = new ArrayList<>();
         this.downloadedVideos = new HashMap<>();
 
         // Setup directory for downloaded videos
-        File videosFolder = new File("downloads/" + channelName + "/");
-        DOWNLOADS_DIR = videosFolder.getAbsolutePath();
-        videosFolder.mkdirs();
+        DOWNLOADS_DIR = context.getExternalFilesDir("downloads").getAbsolutePath();
 
         // Register the new user
         register();
+
+        // Start the timer which monitors the consumer's subscriptions
+        timer = new ConsumerSubscriptionsTimer(this);
+        timer.execute();
     }
 
     public String getChannelName() {
@@ -164,11 +171,11 @@ public class Consumer extends Node {
             BufferedOutputStream bos;
             Object response;
             Chunk chunk;
-            Video requestedVideo;
+            VideoInfo requestedVideo;
             for (int i = 0; i < videosNumber; i++) {
                 // Get the video class instance and save the video
                 response = input.readObject();
-                requestedVideo = (Video) response;
+                requestedVideo = (VideoInfo) response;
                 downloadedVideos.put(requestedVideo, new ArrayList<>());
                 bos = new BufferedOutputStream(new FileOutputStream(
                     new File(DOWNLOADS_DIR, requestedVideo.getFilename())
@@ -236,6 +243,10 @@ public class Consumer extends Node {
         return recommendedChannels;
     }
 
+    public void close() {
+        timer.setTicking(false);
+    }
+
     private void sendTopic(String topic, boolean action) {
         try {
             // Find and connect to the broker responsible for the topic
@@ -260,9 +271,5 @@ public class Consumer extends Node {
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
-    }
-
-    public static void main(String[] args) {
-        new Consumer(args[0]).init();
     }
 }

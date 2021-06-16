@@ -1,4 +1,4 @@
-package gr.aueb.tiktokclone.domain;
+package gr.aueb.brokerlibrary;
 
 import java.net.Socket;
 import java.io.ObjectOutputStream;
@@ -252,8 +252,8 @@ public class MessageHandler implements Runnable {
 
             // Find the number of videos that will be sent
             int videosFound = 0;
-            List<Video> videos = new ArrayList<>();
-            for (Video video : broker.getSavedVideos().keySet()) {
+            List<VideoInfo> videos = new ArrayList<>();
+            for (VideoInfo video : broker.getSavedVideos().keySet()) {
                 if (video.getAssociatedHashtags().contains(topic) &&
                     !channelName.equals(video.getChannelName())) {
                         videos.add(video);
@@ -272,7 +272,7 @@ public class MessageHandler implements Runnable {
             // Send the videos
             List<Chunk> chunks;
             boolean success;
-            for (Video video : videos) {
+            for (VideoInfo video : videos) {
                 // Send the video's class instance
                 output.writeObject(video);
                 output.flush();
@@ -317,7 +317,7 @@ public class MessageHandler implements Runnable {
             // Wait for the channel name and the video's class instance
             String channelName = input.readUTF();
             Object response = input.readObject();
-            Video video = (Video) response;
+            VideoInfo video = (VideoInfo) response;
 
             // Extract topics from video
             for (String topic : video.getAssociatedHashtags())
@@ -325,7 +325,7 @@ public class MessageHandler implements Runnable {
 
             // Find whether the video has already been pulled
             boolean exists = false;
-            for (Video v : broker.getSavedVideos().keySet()) {
+            for (VideoInfo v : broker.getSavedVideos().keySet()) {
                 if (video.getFilename().equals(v.getFilename())) {
                     exists = true;
                     break;
@@ -360,8 +360,8 @@ public class MessageHandler implements Runnable {
             String channelName = input.readUTF();
 
             // Send all videos with the same topic
-            List<Video> videos = new ArrayList<>();
-            for (Video v : broker.getSavedVideos().keySet()) {
+            List<VideoInfo> videos = new ArrayList<>();
+            for (VideoInfo v : broker.getSavedVideos().keySet()) {
                 if (v.getAssociatedHashtags().contains(topic) && !v.getChannelName().equals(channelName))
                     videos.add(v);
             }
@@ -396,7 +396,7 @@ public class MessageHandler implements Runnable {
 
             // Wait for the video class instance and save the video
             Object response = videoInput.readObject();
-            Video requestedVideo = (Video) response;
+            VideoInfo requestedVideo = (VideoInfo) response;
             broker.saveVideo(requestedVideo);
 
             // Receive the chunks

@@ -1,5 +1,7 @@
 package gr.aueb.tiktokclone.domain;
 
+import android.content.Context;
+
 import java.net.Socket;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
@@ -12,8 +14,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.lang.Thread;
 
-import gr.aueb.tiktokclone.domain.PublisherRequestHandler;
-import gr.aueb.tiktokclone.domain.Video;
+import gr.aueb.brokerlibrary.ChannelName;
+import gr.aueb.brokerlibrary.Chunk;
+import gr.aueb.brokerlibrary.Node;
+import gr.aueb.brokerlibrary.VideoInfo;
 
 public class Publisher extends Node {
     private ChannelName channelName;
@@ -23,34 +27,32 @@ public class Publisher extends Node {
     private PublisherRequestHandler handler;
 
     // Data structures
-    private List<Video> savedVideos;
+    private List<VideoInfo> savedVideos;
 
     private final String VIDEOS_DIR;
 
-    public Publisher(String channelName, String ip, int port) {
+    public Publisher(String channelName, String ip, int port, Context context) {
         super();
         this.channelName = new ChannelName(channelName, ip, port);
         this.savedVideos = new ArrayList<>();
 
         // Setup video storage
-        File videoFolder = new File("videos/" + channelName + "/");
-        VIDEOS_DIR = videoFolder.getAbsolutePath();
-        videoFolder.mkdirs();
+        VIDEOS_DIR = context.getExternalFilesDir("videos/").getAbsolutePath();
 
-        // Get the list containg all brokers
+        // Get the list containing all brokers
         getBrokersHashMap();
 
         // Start the request handler
         handler = new PublisherRequestHandler(port, this);
-        Thread requestHandler = new Thread(handler);
-        requestHandler.start();
+        handler = new PublisherRequestHandler(port, this);
+        handler.execute();
     }
 
     public ChannelName getChannelName() {
         return channelName;
     }
 
-    public List<Video> getSavedVideos() {
+    public List<VideoInfo> getSavedVideos() {
         return savedVideos;
     }
 
@@ -136,7 +138,7 @@ public class Publisher extends Node {
         channelName.removeHashtagPublished(hashtag);
     }
 
-    public void upload(Video video) {
+    public void upload(VideoInfo video) {
         try {
             for (String topic : video.getAssociatedHashtags()) {
                 // Update channel's published hashtags and save the video
@@ -210,7 +212,7 @@ public class Publisher extends Node {
     }
 
     @SuppressWarnings("unchecked")
-    public List<Video> requestVideoList(String topic) {
+    public List<VideoInfo> requestVideoList(String topic) {
         try {
             // Connect to the broker responsible for the hashtag
             List<String> broker = super.getBrokerForHash(super.getSHA1Hash(topic));
@@ -227,7 +229,7 @@ public class Publisher extends Node {
 
             // Wait for the list and disconnect
             Object response = input.readObject();
-            List<Video> videos = (ArrayList<Video>) response;
+            List<VideoInfo> videos = (ArrayList<VideoInfo>) response;
             disconnect();
             return videos;
 
@@ -238,13 +240,5 @@ public class Publisher extends Node {
             cnfe.printStackTrace();
             return null;
         }
-    }
-
-    public void close() {
-        handler.close();
-    }
-
-    public static void main(String[] args) {
-        new Publisher(args[0], args[1], Integer.parseInt(args[2])).init();
     }
 }

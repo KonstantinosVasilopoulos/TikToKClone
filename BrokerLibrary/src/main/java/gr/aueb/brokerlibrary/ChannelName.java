@@ -1,9 +1,7 @@
-package gr.aueb.tiktokclone.domain;
+package gr.aueb.brokerlibrary;
 
 import java.util.*;
 import java.io.Serializable;
-
-import gr.aueb.tiktokclone.domain.Video;
 
 /**
  * ChannelName
@@ -11,7 +9,6 @@ import gr.aueb.tiktokclone.domain.Video;
 public class ChannelName implements Serializable {
     private String channelName;
     private ArrayList<String> hashtagsPublished;
-    private transient HashMap<String, ArrayList<Video>> userVideoFilesMap;
     private String ipAddress;
     private int port;
 
@@ -20,7 +17,6 @@ public class ChannelName implements Serializable {
         this.ipAddress = ipAddress;
         this.port = port;
         this.hashtagsPublished = new ArrayList<>();
-        this.userVideoFilesMap = new HashMap<>();
     }
 
     public String getChannelName(){

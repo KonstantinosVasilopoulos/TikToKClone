@@ -1,4 +1,4 @@
-package gr.aueb.tiktokclone.domain;
+package gr.aueb.brokerlibrary;
 
 import java.io.Serializable;
 

@@ -1,20 +1,20 @@
 package gr.aueb.tiktokclone.domain;
 
-import java.util.Scanner;
-import java.io.File;
+import android.content.Context;
 
-import gr.aueb.tiktokclone.domain.Consumer;
-import gr.aueb.tiktokclone.domain.Publisher;
-import gr.aueb.tiktokclone.domain.Video;
+import java.io.File;
+import java.util.Scanner;
+
+import gr.aueb.brokerlibrary.VideoInfo;
 
 public class AppNode {
     private Publisher publisher;
     private Consumer consumer;
     private Scanner in;
 
-    public AppNode(String channelName, String ip, int port) {
-        publisher = new Publisher(channelName, ip, port);
-        consumer = new Consumer(channelName);
+    public AppNode(String channelName, String ip, int port, Context context) {
+        publisher = new Publisher(channelName, ip, port, context);
+        consumer = new Consumer(channelName, context);
     }
 
     // The CLIModule allows the user to operate an AppNode's 
@@ -68,7 +68,7 @@ public class AppNode {
 
                 case "exit":
                     operational = false;
-                    publisher.close();
+                    consumer.close();
                     System.exit(0);
 
                 default:
@@ -100,7 +100,7 @@ public class AppNode {
         String videoName = in.nextLine();
 
         // Get the hashtags for the video
-        Video video = new Video(videoName, publisher.getVideosDir(), filename, publisher.getChannelName().getChannelName());
+        VideoInfo video = new VideoInfo(videoName, publisher.getVideosDir(), filename, publisher.getChannelName().getChannelName());
         String hashtag;
         do {
             System.out.println("AppNode: Give one hashtag or \"done\" to upload: ");
@@ -132,7 +132,7 @@ public class AppNode {
         System.out.println("AppNode: Give a topic: ");
         String topic = in.nextLine();
 
-        for (Video video : publisher.requestVideoList(topic))
+        for (VideoInfo video : publisher.requestVideoList(topic))
             System.out.println("AppNode: " + video.getName() + " - " + video.getFilename());
     }
 
@@ -142,9 +142,5 @@ public class AppNode {
 
     public Consumer getConsumer() {
         return consumer;
-    }
-
-    public static void main(String[] args) {
-        new AppNode(args[0], args[1], Integer.parseInt(args[2])).startCLIModule();
     }
 }

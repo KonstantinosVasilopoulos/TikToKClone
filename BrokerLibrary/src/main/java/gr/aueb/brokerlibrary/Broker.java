@@ -1,4 +1,4 @@
-package gr.aueb.tiktokclone.domain;
+package gr.aueb.brokerlibrary;
 
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -22,7 +22,7 @@ public class Broker extends Node implements Runnable {
     private ConcurrentMap<String, List<String>> registeredUsers;
 
     // Data structure for storing saved videos
-    private ConcurrentMap<Video, List<Chunk>> savedVideos;
+    private ConcurrentMap<VideoInfo, List<Chunk>> savedVideos;
 
     private final String IP_ADDRESS;
     private final int SERVER_PORT;
@@ -44,7 +44,7 @@ public class Broker extends Node implements Runnable {
         int brokersNum = 3;  // CHANGE THIS IF YOU WANT TO CHANGE THE NUMBER OF BROKERS!
         for (int i = 0; i < brokersNum; i++) {
             List<String> info = new ArrayList<>();
-            info.add("127.0.0.1");
+            info.add(ip);
             info.add(String.valueOf(55217 + i));
             brokers.put(getSHA1Hash(info.get(0) + info.get(1)), info);
         }
@@ -101,29 +101,29 @@ public class Broker extends Node implements Runnable {
         return new ArrayList<>(registeredPublishers);
     }
 
-    public ConcurrentMap<Video, List<Chunk>> getSavedVideos() {
+    public ConcurrentMap<VideoInfo, List<Chunk>> getSavedVideos() {
         return savedVideos;
     }
 
-    public void saveVideo(Video video) {
+    public void saveVideo(VideoInfo video) {
         if (!savedVideos.containsKey(video))
             savedVideos.put(video, new ArrayList<Chunk>());
     }
 
-    public void deleteVideo(Video video) {
+    public void deleteVideo(VideoInfo video) {
         savedVideos.remove(video);
     }
 
-    public void addHashtagToVideo(Video video, String hashtag) {
+    public void addHashtagToVideo(VideoInfo video, String hashtag) {
         if (savedVideos.containsKey(video)) {
-            for (Video v : savedVideos.keySet()) {
+            for (VideoInfo v : savedVideos.keySet()) {
                 if (v.getFilename().equals(video.getFilename()))
                     v.addAssociatedHashtag(hashtag);
             }
         }
     }
 
-    public void addChunkToVideo(Video video, Chunk chunk) {
+    public void addChunkToVideo(VideoInfo video, Chunk chunk) {
         if (savedVideos.containsKey(video))
             savedVideos.get(video).add(chunk);
     }
