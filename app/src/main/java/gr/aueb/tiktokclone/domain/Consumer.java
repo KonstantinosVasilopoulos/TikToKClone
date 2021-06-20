@@ -1,7 +1,9 @@
 package gr.aueb.tiktokclone.domain;
 
 import android.content.Context;
+import android.os.AsyncTask;
 
+import java.math.BigInteger;
 import java.net.Socket;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
@@ -9,6 +11,9 @@ import java.io.IOException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.BufferedOutputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
@@ -19,11 +24,13 @@ import gr.aueb.brokerlibrary.Chunk;
 import gr.aueb.brokerlibrary.VideoInfo;
 import gr.aueb.brokerlibrary.Node;
 
-public class Consumer extends Node {
+public class Consumer extends AsyncTask<String, Void, Void> implements Node {
+    // Keys are hashes and values are lists with IP address and ports
+    private Map<String, List<String>> brokers;
     private Socket socket;
     private ObjectOutputStream output;
     private ObjectInputStream input;
-    private final ConsumerSubscriptionsTimer timer;
+    private final ConsumerSubscriptionsTimer timer = null;
 
     // Data
     private String channelName;
@@ -34,6 +41,7 @@ public class Consumer extends Node {
 
     public Consumer(String channelName, Context context) {
         super();
+        this.brokers = new HashMap<>();
         this.channelName = channelName;
         this.subscribedTopics = new ArrayList<>();
         this.downloadedVideos = new HashMap<>();
@@ -41,12 +49,37 @@ public class Consumer extends Node {
         // Setup directory for downloaded videos
         DOWNLOADS_DIR = context.getExternalFilesDir("downloads").getAbsolutePath();
 
-        // Register the new user
-        register();
-
         // Start the timer which monitors the consumer's subscriptions
-        timer = new ConsumerSubscriptionsTimer(this);
-        timer.execute();
+        Thread timer = new Thread(new ConsumerSubscriptionsTimer(this));
+        timer.start();
+    }
+
+    @Override
+    protected Void doInBackground(String... strings) {
+        switch (strings[0]) {
+            case "register":
+                // Register the new user
+                register();
+                break;
+
+            case "query":
+                query(strings[1]);
+                break;
+
+            case "subscribe":
+                subscribe(strings[1]);
+                break;
+
+            case "unsubscribe":
+                unsubscribe(strings[1]);
+                break;
+
+            case "close":
+                close();
+                break;
+        }
+
+        return null;
     }
 
     public String getChannelName() {
@@ -113,7 +146,8 @@ public class Consumer extends Node {
     public void register() {
         try {
             // Connect to 127.0.0.1:55217
-            connect("127.0.0.1", 55217);
+            final String BROKER_IP = "192.168.1.4";
+            connect(BROKER_IP, 55217);
 
             // Send "register"
             output.writeUTF("register");
@@ -137,14 +171,12 @@ public class Consumer extends Node {
             // Close the connection
             disconnect();
 
-        } catch (IOException ioe) {
+        } catch (IOException | ClassNotFoundException ioe) {
             ioe.printStackTrace();
-        } catch (ClassNotFoundException cnfe) {
-            cnfe.printStackTrace();
         }
     }
 
-    public void query(String topic) {
+    private void query(String topic) {
         try {
             // Send "query" to the correct broker
             List<String> broker = getBrokerForHash(getSHA1Hash(topic));
@@ -247,6 +279,41 @@ public class Consumer extends Node {
         timer.setTicking(false);
     }
 
+    @Override
+    public String getSHA1Hash(String text) {
+        String hashedText = "";
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            byte[] textDigest = md.digest(text.getBytes());
+            BigInteger no = new BigInteger(1, textDigest);
+            hashedText = no.toString(16);
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
+        return hashedText;
+    }
+
+    // Returns the broker to whom the hash belongs to
+    // The broker is a list containing the broker's IP
+    // address and port
+    @Override
+    public List<String> getBrokerForHash(String hash) {
+        List<String> hashes = new ArrayList<>(brokers.keySet());
+        Collections.sort(hashes);
+        for (String h : hashes) {
+            if (hash.compareTo(h) <= 0) {
+                return brokers.get(h);
+            }
+        }
+
+        // Return the last broker
+        String lastHash = hashes.get(hashes.size() - 1);
+        return brokers.get(lastHash);
+    }
+
     private void sendTopic(String topic, boolean action) {
         try {
             // Find and connect to the broker responsible for the topic
@@ -271,5 +338,15 @@ public class Consumer extends Node {
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
+    }
+
+    @Override
+    public Map<String, List<String>> getBrokers() {
+        return brokers;
+    }
+
+    @Override
+    public void setBrokers(Map<String, List<String>> brokers) {
+        this.brokers = brokers;
     }
 }

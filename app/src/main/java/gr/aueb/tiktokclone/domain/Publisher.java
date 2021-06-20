@@ -1,7 +1,9 @@
 package gr.aueb.tiktokclone.domain;
 
 import android.content.Context;
+import android.os.AsyncTask;
 
+import java.math.BigInteger;
 import java.net.Socket;
 import java.io.ObjectOutputStream;
 import java.io.ObjectInputStream;
@@ -9,17 +11,23 @@ import java.io.IOException;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.BufferedInputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.lang.Thread;
+import java.util.Map;
 
 import gr.aueb.brokerlibrary.ChannelName;
 import gr.aueb.brokerlibrary.Chunk;
 import gr.aueb.brokerlibrary.Node;
 import gr.aueb.brokerlibrary.VideoInfo;
 
-public class Publisher extends Node {
+public class Publisher extends AsyncTask<Object, Void, Void> implements Node {
+    // Keys are hashes and values are lists with IP address and ports
+    private Map<String, List<String>> brokers;
     private ChannelName channelName;
     private Socket brokerSocket;
     private ObjectOutputStream output;
@@ -30,22 +38,44 @@ public class Publisher extends Node {
     private List<VideoInfo> savedVideos;
 
     private final String VIDEOS_DIR;
+    private final String BROKER_IP = "192.168.1.4";
+
+    // Return values
+    private List<VideoInfo> videoList;
 
     public Publisher(String channelName, String ip, int port, Context context) {
         super();
+        this.brokers = new HashMap<>();
         this.channelName = new ChannelName(channelName, ip, port);
         this.savedVideos = new ArrayList<>();
 
         // Setup video storage
         VIDEOS_DIR = context.getExternalFilesDir("videos/").getAbsolutePath();
 
-        // Get the list containing all brokers
-        getBrokersHashMap();
-
         // Start the request handler
-        handler = new PublisherRequestHandler(port, this);
-        handler = new PublisherRequestHandler(port, this);
-        handler.execute();
+        Thread handler = new Thread(new PublisherRequestHandler(port, this));
+        handler.start();
+    }
+
+    @Override
+    protected Void doInBackground(Object... params) {
+        switch ((String) params[0]) {
+            case "getBrokersHashMap":
+                // Get the list containing all brokers
+                getBrokersHashMap();
+                break;
+
+            case "upload":
+                upload((VideoInfo) params[1]);
+                break;
+
+            case "requestVideoList":
+                videoList = requestVideoList((String) params[1]);
+                break;
+
+        }
+
+        return null;
     }
 
     public ChannelName getChannelName() {
@@ -106,10 +136,10 @@ public class Publisher extends Node {
     // Get the hashmap containing all brokers along with their info
     // We assume 127.0.0.1:55217 is always active
     @SuppressWarnings("unchecked")
-    public void getBrokersHashMap() {
+    private void getBrokersHashMap() {
         try {
             // Connect to 127.0.0.1:55217
-            connect("127.0.0.1", 55217);
+            connect(BROKER_IP, 55217);
 
             // Send "getBrokers"
             output.writeUTF("getBrokers");
@@ -123,10 +153,8 @@ public class Publisher extends Node {
             // Close the connection
             disconnect();
 
-        } catch (IOException ioe) {
+        } catch (IOException | ClassNotFoundException ioe) {
             ioe.printStackTrace();
-        } catch (ClassNotFoundException cnfe) {
-            cnfe.printStackTrace();
         }
     }
 
@@ -138,7 +166,7 @@ public class Publisher extends Node {
         channelName.removeHashtagPublished(hashtag);
     }
 
-    public void upload(VideoInfo video) {
+    private void upload(VideoInfo video) {
         try {
             for (String topic : video.getAssociatedHashtags()) {
                 // Update channel's published hashtags and save the video
@@ -147,7 +175,7 @@ public class Publisher extends Node {
                     savedVideos.add(video);
 
                 // Connect to the broker responsible for the hashtag
-                List<String> broker = super.getBrokerForHash(super.getSHA1Hash(topic));
+                List<String> broker = getBrokerForHash(getSHA1Hash(topic));
                 connect(broker.get(0), Integer.parseInt(broker.get(1)));
 
                 // Send "upload"
@@ -212,10 +240,10 @@ public class Publisher extends Node {
     }
 
     @SuppressWarnings("unchecked")
-    public List<VideoInfo> requestVideoList(String topic) {
+    private List<VideoInfo> requestVideoList(String topic) {
         try {
             // Connect to the broker responsible for the hashtag
-            List<String> broker = super.getBrokerForHash(super.getSHA1Hash(topic));
+            List<String> broker = getBrokerForHash(getSHA1Hash(topic));
             connect(broker.get(0), Integer.parseInt(broker.get(1)));
 
             // Send "requestVideoList"
@@ -240,5 +268,54 @@ public class Publisher extends Node {
             cnfe.printStackTrace();
             return null;
         }
+    }
+
+    @Override
+    public String getSHA1Hash(String text) {
+        String hashedText = "";
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            byte[] textDigest = md.digest(text.getBytes());
+            BigInteger no = new BigInteger(1, textDigest);
+            hashedText = no.toString(16);
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
+        return hashedText;
+    }
+
+    // Returns the broker to whom the hash belongs to
+    // The broker is a list containing the broker's IP
+    // address and port
+    @Override
+    public List<String> getBrokerForHash(String hash) {
+        List<String> hashes = new ArrayList<>(brokers.keySet());
+        Collections.sort(hashes);
+        for (String h : hashes) {
+            if (hash.compareTo(h) <= 0) {
+                return brokers.get(h);
+            }
+        }
+
+        // Return the last broker
+        String lastHash = hashes.get(hashes.size() - 1);
+        return brokers.get(lastHash);
+    }
+
+    @Override
+    public Map<String, List<String>> getBrokers() {
+        return brokers;
+    }
+
+    @Override
+    public void setBrokers(Map<String, List<String>> brokers) {
+        this.brokers = brokers;
+    }
+
+    public List<VideoInfo> getVideoList() {
+        return videoList;
     }
 }

@@ -7,7 +7,7 @@ import java.net.Socket;
 import java.io.IOException;
 import java.lang.Thread;
 
-public class PublisherRequestHandler extends AsyncTask<Void, Void, Void> {
+public class PublisherRequestHandler implements Runnable {
     private final Publisher publisher;
     private ServerSocket server;
 
@@ -20,7 +20,7 @@ public class PublisherRequestHandler extends AsyncTask<Void, Void, Void> {
     }
 
     @Override
-    protected Void doInBackground(Void... voids) {
+    public void run() {
         try {
             // Open a server socket
             server = new ServerSocket(PORT);
@@ -37,17 +37,16 @@ public class PublisherRequestHandler extends AsyncTask<Void, Void, Void> {
         } catch (IOException ioe) {
             ioe.printStackTrace();
         }
-        return null;
     }
 
-    @Override
-    protected void onPostExecute(Void unused) {
-        try {
-            server.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//    @Override
+//    protected void onPostExecute(Void unused) {
+//        try {
+//            server.close();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     public int getPort() {
         return PORT;

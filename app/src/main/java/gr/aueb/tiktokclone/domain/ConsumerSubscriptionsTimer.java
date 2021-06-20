@@ -1,8 +1,8 @@
 package gr.aueb.tiktokclone.domain;
 
-import android.os.AsyncTask;
+import java.util.concurrent.ExecutionException;
 
-public class ConsumerSubscriptionsTimer extends AsyncTask<Void, Void, Void> {
+public class ConsumerSubscriptionsTimer implements Runnable {
     private final Consumer consumer;
     private long startTime;
     private long endTime;
@@ -17,12 +17,16 @@ public class ConsumerSubscriptionsTimer extends AsyncTask<Void, Void, Void> {
     }
 
     @Override
-    protected Void doInBackground(Void... voids) {
+    public void run() {
         while (ticking) {
             endTime = System.currentTimeMillis() - startTime;
             if (endTime >= PERIOD) {
                 for (String topic : consumer.getSubscribedTopics()) {
-                    consumer.query(topic);
+                    try {
+                        consumer.execute("query", topic).get();
+                    } catch (ExecutionException | InterruptedException e) {
+                        e.printStackTrace();
+                    }
 
                     // Sleep for 1 second
                     try {
@@ -44,8 +48,6 @@ public class ConsumerSubscriptionsTimer extends AsyncTask<Void, Void, Void> {
                 }
             }
         }
-
-        return null;
     }
 
     public void setTicking(boolean ticking) {

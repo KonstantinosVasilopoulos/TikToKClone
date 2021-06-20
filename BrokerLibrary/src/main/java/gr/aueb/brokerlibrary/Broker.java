@@ -1,15 +1,24 @@
 package gr.aueb.brokerlibrary;
 
+import java.math.BigInteger;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.*;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.lang.Thread;
 
-public class Broker extends Node implements Runnable {
+public class Broker implements Node, Runnable {
+    // Keys are hashes and values are lists with IP address and ports
+    private Map<String, List<String>> brokers;
+
     private ServerSocket serverSocket;
 
     // The hash is used for determining which hashtags and content creators
@@ -33,6 +42,7 @@ public class Broker extends Node implements Runnable {
         SERVER_PORT = port;
 
         // Initiate data structures
+        brokers = new HashMap<>();
         registeredUsers = new ConcurrentHashMap<>();
         registeredPublishers = new ArrayList<>();
         savedVideos = new ConcurrentHashMap<>();
@@ -59,7 +69,7 @@ public class Broker extends Node implements Runnable {
     public void init() {
         try {
             serverSocket = new ServerSocket(SERVER_PORT);
-            System.out.println("Broker " + hash + ": Server running.");
+            System.out.println("Broker " + hash + ": Server running at " + SERVER_PORT + ".");
 
             while (true) {
                 // Await connection from a producer or consumer
@@ -91,6 +101,41 @@ public class Broker extends Node implements Runnable {
     @Override
     public void connect(String address, int port) {
         
+    }
+
+    @Override
+    public String getSHA1Hash(String text) {
+        String hashedText = "";
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-1");
+            byte[] textDigest = md.digest(text.getBytes());
+            BigInteger no = new BigInteger(1, textDigest);
+            hashedText = no.toString(16);
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
+        return hashedText;
+    }
+
+    // Returns the broker to whom the hash belongs to
+    // The broker is a list containing the broker's IP
+    // address and port
+    @Override
+    public List<String> getBrokerForHash(String hash) {
+        List<String> hashes = new ArrayList<>(brokers.keySet());
+        Collections.sort(hashes);
+        for (String h : hashes) {
+            if (hash.compareTo(h) <= 0) {
+                return brokers.get(h);
+            }
+        }
+
+        // Return the last broker
+        String lastHash = hashes.get(hashes.size() - 1);
+        return brokers.get(lastHash);
     }
 
     public String getHash() {
@@ -193,6 +238,16 @@ public class Broker extends Node implements Runnable {
                 return;
         }
         registeredPublishers.add(channelName);
+    }
+
+    @Override
+    public Map<String, List<String>> getBrokers() {
+        return brokers;
+    }
+
+    @Override
+    public void setBrokers(Map<String, List<String>> brokers) {
+        this.brokers = brokers;
     }
 
     public static void main(String[] args) {

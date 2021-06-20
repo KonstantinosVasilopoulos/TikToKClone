@@ -1,20 +1,50 @@
 package gr.aueb.tiktokclone.domain;
 
 import android.content.Context;
+import android.net.wifi.WifiManager;
+import android.text.format.Formatter;
 
 import java.io.File;
 import java.util.Scanner;
+import java.util.concurrent.ExecutionException;
 
 import gr.aueb.brokerlibrary.VideoInfo;
 
+import static android.content.Context.WIFI_SERVICE;
+
 public class AppNode {
-    private Publisher publisher;
-    private Consumer consumer;
+
+    // AppNode is a singleton
+    private static AppNode instance = null;
+    private final Publisher publisher;
+    private final Consumer consumer;
     private Scanner in;
 
-    public AppNode(String channelName, String ip, int port, Context context) {
+    private AppNode(String channelName, String ip, int port, Context context) {
         publisher = new Publisher(channelName, ip, port, context);
         consumer = new Consumer(channelName, context);
+        try {
+            publisher.execute("getBrokersHashMap");
+            consumer.execute("register").get();
+
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void init(String channelName, Context context) {
+        if (instance == null) {
+            WifiManager wm = (WifiManager) context.getApplicationContext().getSystemService(WIFI_SERVICE);
+            String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+            instance = new AppNode(channelName, ip, 55220, context);
+        }
+    }
+
+    public static AppNode getInstance() {
+        if (instance != null)
+            return instance;
+
+        return null;
     }
 
     // The CLIModule allows the user to operate an AppNode's 
@@ -68,7 +98,7 @@ public class AppNode {
 
                 case "exit":
                     operational = false;
-                    consumer.close();
+                    consumer.execute("close");
                     System.exit(0);
 
                 default:
@@ -84,7 +114,7 @@ public class AppNode {
         // Get a topic
         System.out.println("AppNode: Give a topic: ");
         String topic = in.nextLine();
-        consumer.query(topic);
+        consumer.execute("query", topic);
     }
 
     public void upload() {
@@ -109,21 +139,21 @@ public class AppNode {
         } while (!hashtag.equals("done"));
 
         // Upload the video
-        publisher.upload(video);
+        publisher.execute("upload", video);
     }
 
-    public void subscribe() {
+    private void subscribe() {
         // Get a topic
         System.out.println("AppNode: Give a topic: ");
         String topic = in.nextLine();
-        consumer.subscribe(topic);
+        consumer.execute("subscribe", topic);
     }
 
-    public void unsubscribe() {
+    private void unsubscribe() {
         // Get a topic
         System.out.println("AppNode: Give a topic: ");
         String topic = in.nextLine();
-        consumer.unsubscribe(topic);
+        consumer.execute("unsubscribe", topic);
     }
 
     // Show a list of videos with a specific topic
@@ -132,8 +162,14 @@ public class AppNode {
         System.out.println("AppNode: Give a topic: ");
         String topic = in.nextLine();
 
-        for (VideoInfo video : publisher.requestVideoList(topic))
-            System.out.println("AppNode: " + video.getName() + " - " + video.getFilename());
+        try {
+            publisher.execute("requestVideoList", topic).get();
+            for (VideoInfo video : publisher.getVideoList())
+                System.out.println("AppNode: " + video.getName() + " - " + video.getFilename());
+
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     public Publisher getPublisher() {

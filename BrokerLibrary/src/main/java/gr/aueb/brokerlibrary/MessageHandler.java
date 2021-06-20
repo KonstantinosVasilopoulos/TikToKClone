@@ -119,10 +119,8 @@ public class MessageHandler implements Runnable {
             }
             output.flush();
 
-        } catch (IOException ioe) {
+        } catch (IOException | ClassNotFoundException ioe) {
             ioe.printStackTrace();
-        } catch (ClassNotFoundException cnfe) {
-            cnfe.printStackTrace();
         }
     }
 
@@ -147,7 +145,7 @@ public class MessageHandler implements Runnable {
                 otherOutput.writeUTF("notifyChanges");
                 otherOutput.flush();
 
-                // Send registeredUSers hashmap
+                // Send registeredUsers hashmap
                 otherOutput.writeObject(broker.getRegisteredUsers());
                 otherOutput.flush();
 
@@ -236,10 +234,8 @@ public class MessageHandler implements Runnable {
             }
             System.out.println("Broker " + broker.getHash() + ": Got notified about changes.");
 
-        } catch (IOException ioe) {
+        } catch (IOException | ClassNotFoundException ioe) {
             ioe.printStackTrace();
-        } catch (ClassNotFoundException cnfe) {
-            cnfe.printStackTrace();
         }
     }
 
