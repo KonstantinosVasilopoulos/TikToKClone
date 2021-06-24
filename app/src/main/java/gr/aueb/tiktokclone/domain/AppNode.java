@@ -5,6 +5,7 @@ import android.net.wifi.WifiManager;
 import android.text.format.Formatter;
 
 import java.io.File;
+import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.ExecutionException;
 
@@ -23,13 +24,6 @@ public class AppNode {
     private AppNode(String channelName, String ip, int port, Context context) {
         publisher = new Publisher(channelName, ip, port, context);
         consumer = new Consumer(channelName, context);
-        try {
-            publisher.execute("getBrokersHashMap");
-            consumer.execute("register").get();
-
-        } catch (InterruptedException | ExecutionException e) {
-            e.printStackTrace();
-        }
     }
 
     public static void init(String channelName, Context context) {
@@ -98,7 +92,7 @@ public class AppNode {
 
                 case "exit":
                     operational = false;
-                    consumer.execute("close");
+                    consumer.close();
                     System.exit(0);
 
                 default:
@@ -114,7 +108,7 @@ public class AppNode {
         // Get a topic
         System.out.println("AppNode: Give a topic: ");
         String topic = in.nextLine();
-        consumer.execute("query", topic);
+        consumer.query(topic);
     }
 
     public void upload() {
@@ -139,21 +133,21 @@ public class AppNode {
         } while (!hashtag.equals("done"));
 
         // Upload the video
-        publisher.execute("upload", video);
+        publisher.upload(video);
     }
 
     private void subscribe() {
         // Get a topic
         System.out.println("AppNode: Give a topic: ");
         String topic = in.nextLine();
-        consumer.execute("subscribe", topic);
+        consumer.subscribe(topic);
     }
 
     private void unsubscribe() {
         // Get a topic
         System.out.println("AppNode: Give a topic: ");
         String topic = in.nextLine();
-        consumer.execute("unsubscribe", topic);
+        consumer.unsubscribe(topic);
     }
 
     // Show a list of videos with a specific topic
@@ -162,14 +156,14 @@ public class AppNode {
         System.out.println("AppNode: Give a topic: ");
         String topic = in.nextLine();
 
-        try {
-            publisher.execute("requestVideoList", topic).get();
-            for (VideoInfo video : publisher.getVideoList())
-                System.out.println("AppNode: " + video.getName() + " - " + video.getFilename());
+        List<VideoInfo> videoList = publisher.requestVideoList(topic);
+        for (VideoInfo video : videoList)
+            System.out.println("AppNode: " + video.getName() + " - " + video.getFilename());
+    }
 
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
+    // TODO: For debugging purposes
+    private void setUpDebug() {
+
     }
 
     public Publisher getPublisher() {

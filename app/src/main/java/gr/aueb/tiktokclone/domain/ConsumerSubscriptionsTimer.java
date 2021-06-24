@@ -22,11 +22,7 @@ public class ConsumerSubscriptionsTimer implements Runnable {
             endTime = System.currentTimeMillis() - startTime;
             if (endTime >= PERIOD) {
                 for (String topic : consumer.getSubscribedTopics()) {
-                    try {
-                        consumer.execute("query", topic).get();
-                    } catch (ExecutionException | InterruptedException e) {
-                        e.printStackTrace();
-                    }
+                    consumer.query(topic);
 
                     // Sleep for 1 second
                     try {

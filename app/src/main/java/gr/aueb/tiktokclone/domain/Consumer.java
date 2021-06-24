@@ -24,13 +24,13 @@ import gr.aueb.brokerlibrary.Chunk;
 import gr.aueb.brokerlibrary.VideoInfo;
 import gr.aueb.brokerlibrary.Node;
 
-public class Consumer extends AsyncTask<String, Void, Void> implements Node {
+public class Consumer implements Node {
     // Keys are hashes and values are lists with IP address and ports
     private Map<String, List<String>> brokers;
     private Socket socket;
     private ObjectOutputStream output;
     private ObjectInputStream input;
-    private final ConsumerSubscriptionsTimer timer = null;
+    private final ConsumerSubscriptionsTimer timer;
 
     // Data
     private String channelName;
@@ -49,37 +49,13 @@ public class Consumer extends AsyncTask<String, Void, Void> implements Node {
         // Setup directory for downloaded videos
         DOWNLOADS_DIR = context.getExternalFilesDir("downloads").getAbsolutePath();
 
+        // Register the new user
+        register();
+
         // Start the timer which monitors the consumer's subscriptions
-        Thread timer = new Thread(new ConsumerSubscriptionsTimer(this));
-        timer.start();
-    }
-
-    @Override
-    protected Void doInBackground(String... strings) {
-        switch (strings[0]) {
-            case "register":
-                // Register the new user
-                register();
-                break;
-
-            case "query":
-                query(strings[1]);
-                break;
-
-            case "subscribe":
-                subscribe(strings[1]);
-                break;
-
-            case "unsubscribe":
-                unsubscribe(strings[1]);
-                break;
-
-            case "close":
-                close();
-                break;
-        }
-
-        return null;
+        timer = new ConsumerSubscriptionsTimer(this);
+        Thread timerThread = new Thread(timer);
+        timerThread.start();
     }
 
     public String getChannelName() {
@@ -88,6 +64,10 @@ public class Consumer extends AsyncTask<String, Void, Void> implements Node {
 
     public List<String> getSubscribedTopics() {
         return subscribedTopics;
+    }
+
+    public Map<VideoInfo, List<Chunk>> getDownloadedVideos() {
+        return downloadedVideos;
     }
 
     public void subscribe(String topic) {
@@ -176,7 +156,7 @@ public class Consumer extends AsyncTask<String, Void, Void> implements Node {
         }
     }
 
-    private void query(String topic) {
+    public void query(String topic) {
         try {
             // Send "query" to the correct broker
             List<String> broker = getBrokerForHash(getSHA1Hash(topic));
@@ -234,10 +214,8 @@ public class Consumer extends AsyncTask<String, Void, Void> implements Node {
 
             disconnect();
 
-        } catch (IOException ioe) {
+        } catch (IOException | ClassNotFoundException ioe) {
             ioe.printStackTrace();
-        } catch (ClassNotFoundException cnfe) {
-            cnfe.printStackTrace();
         }
     }
 

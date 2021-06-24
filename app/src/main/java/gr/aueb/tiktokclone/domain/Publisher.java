@@ -25,7 +25,7 @@ import gr.aueb.brokerlibrary.Chunk;
 import gr.aueb.brokerlibrary.Node;
 import gr.aueb.brokerlibrary.VideoInfo;
 
-public class Publisher extends AsyncTask<Object, Void, Void> implements Node {
+public class Publisher implements Node {
     // Keys are hashes and values are lists with IP address and ports
     private Map<String, List<String>> brokers;
     private ChannelName channelName;
@@ -40,9 +40,6 @@ public class Publisher extends AsyncTask<Object, Void, Void> implements Node {
     private final String VIDEOS_DIR;
     private final String BROKER_IP = "192.168.1.4";
 
-    // Return values
-    private List<VideoInfo> videoList;
-
     public Publisher(String channelName, String ip, int port, Context context) {
         super();
         this.brokers = new HashMap<>();
@@ -52,30 +49,12 @@ public class Publisher extends AsyncTask<Object, Void, Void> implements Node {
         // Setup video storage
         VIDEOS_DIR = context.getExternalFilesDir("videos/").getAbsolutePath();
 
+        // Get the list containing all brokers
+        getBrokersHashMap();
+
         // Start the request handler
         Thread handler = new Thread(new PublisherRequestHandler(port, this));
         handler.start();
-    }
-
-    @Override
-    protected Void doInBackground(Object... params) {
-        switch ((String) params[0]) {
-            case "getBrokersHashMap":
-                // Get the list containing all brokers
-                getBrokersHashMap();
-                break;
-
-            case "upload":
-                upload((VideoInfo) params[1]);
-                break;
-
-            case "requestVideoList":
-                videoList = requestVideoList((String) params[1]);
-                break;
-
-        }
-
-        return null;
     }
 
     public ChannelName getChannelName() {
@@ -166,7 +145,7 @@ public class Publisher extends AsyncTask<Object, Void, Void> implements Node {
         channelName.removeHashtagPublished(hashtag);
     }
 
-    private void upload(VideoInfo video) {
+    public void upload(VideoInfo video) {
         try {
             for (String topic : video.getAssociatedHashtags()) {
                 // Update channel's published hashtags and save the video
@@ -240,7 +219,7 @@ public class Publisher extends AsyncTask<Object, Void, Void> implements Node {
     }
 
     @SuppressWarnings("unchecked")
-    private List<VideoInfo> requestVideoList(String topic) {
+    public List<VideoInfo> requestVideoList(String topic) {
         try {
             // Connect to the broker responsible for the hashtag
             List<String> broker = getBrokerForHash(getSHA1Hash(topic));
@@ -261,11 +240,8 @@ public class Publisher extends AsyncTask<Object, Void, Void> implements Node {
             disconnect();
             return videos;
 
-        } catch (IOException ioe) {
+        } catch (IOException | ClassNotFoundException ioe) {
             ioe.printStackTrace();
-            return null;
-        } catch (ClassNotFoundException cnfe) {
-            cnfe.printStackTrace();
             return null;
         }
     }
@@ -313,9 +289,5 @@ public class Publisher extends AsyncTask<Object, Void, Void> implements Node {
     @Override
     public void setBrokers(Map<String, List<String>> brokers) {
         this.brokers = brokers;
-    }
-
-    public List<VideoInfo> getVideoList() {
-        return videoList;
     }
 }
