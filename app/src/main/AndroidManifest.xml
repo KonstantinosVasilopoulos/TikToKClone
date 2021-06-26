@@ -4,7 +4,8 @@
     package="gr.aueb.tiktokclone">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+    <uses-permission
+        android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         tools:ignore="ScopedStorage" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -13,10 +14,11 @@
     <application
         android:icon="@mipmap/tik_tok_clone_app_icon"
         android:label="@string/app_name"
+        android:requestLegacyExternalStorage="true"
         android:roundIcon="@mipmap/tik_tok_clone_app_icon_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.TikTokClone"
-        android:requestLegacyExternalStorage="true">
+        android:theme="@style/Theme.TikTokClone">
+        <activity android:name=".ui.FollowingActivity"></activity>
         <activity android:name=".ui.ChannelActivity" />
         <activity android:name=".ui.MainActivity" />
         <activity android:name=".ui.LoginActivity">

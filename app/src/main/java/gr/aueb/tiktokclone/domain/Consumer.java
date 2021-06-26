@@ -34,9 +34,9 @@ public class Consumer implements Node {
     private final ConsumerSubscriptionsTimer timer;
 
     // Data
-    private String channelName;
-    private List<String> subscribedTopics;
-    private Map<VideoInfo, List<Chunk>> downloadedVideos;
+    private final String channelName;
+    private final List<String> subscribedTopics;
+    private final Map<VideoInfo, List<Chunk>> downloadedVideos;
 
     private final String DOWNLOADS_DIR;
 
@@ -187,6 +187,15 @@ public class Consumer implements Node {
             // Send the channel's name and the topic
             output.writeUTF(channelName);
             output.writeUTF(topic);
+            output.flush();
+
+            // Send a list containing the relevant videos that this consumer already owns
+            List<VideoInfo> ownedVideos = new ArrayList<>();
+            for (VideoInfo video : downloadedVideos.keySet()) {
+                if (video.getAssociatedHashtags().contains(topic))
+                    ownedVideos.add(video);
+            }
+            output.writeObject(ownedVideos);
             output.flush();
 
             // Wait for an answer

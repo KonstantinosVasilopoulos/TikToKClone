@@ -201,7 +201,7 @@ public class Publisher implements Node {
         List<Chunk> chunks = new ArrayList<>();
         Chunk chunk;
         int chunkNumber = 0;
-        int chunkSize = 163840;  // 20 KB
+        int chunkSize = 81920;  // 10 KB
         int bytesRead;
         byte[] buffer = new byte[chunkSize];
 

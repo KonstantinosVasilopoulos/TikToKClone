@@ -247,12 +247,17 @@ public class MessageHandler implements Runnable {
             String channelName = input.readUTF();
             String topic = input.readUTF();
 
+            // Receive a list with all the relevant videos that the consumer possesses
+            @SuppressWarnings("unchecked")
+            List<VideoInfo> ownedVideos = (ArrayList<VideoInfo>) input.readObject();
+
             // Find the number of videos that will be sent
             int videosFound = 0;
             List<VideoInfo> videos = new ArrayList<>();
             for (VideoInfo video : broker.getSavedVideos().keySet()) {
                 if (video.getAssociatedHashtags().contains(topic) &&
-                    !channelName.equals(video.getChannelName())) {
+                    !channelName.equals(video.getChannelName()) &&
+                    listDoesNotContainVideo(ownedVideos, video)) {
                         videos.add(video);
                         videosFound++;
                 }
@@ -288,7 +293,7 @@ public class MessageHandler implements Runnable {
                 System.out.println("Broker " + broker.getHash() + ": Sent video " + video.getFilename() + ".");
             }
         
-        } catch (IOException ioe) {
+        } catch (IOException | ClassNotFoundException ioe) {
             ioe.printStackTrace();
         }
     }
@@ -419,5 +424,14 @@ public class MessageHandler implements Runnable {
         } catch (IOException | ClassNotFoundException ioe) {
             ioe.printStackTrace();
         }
+    }
+
+    private boolean listDoesNotContainVideo(List<VideoInfo> videos, VideoInfo video) {
+        for (VideoInfo v : videos) {
+            if (video.getFilename().equals(v.getFilename()))
+                return false;
+        }
+
+        return true;
     }
 }

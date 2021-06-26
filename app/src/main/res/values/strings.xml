@@ -14,4 +14,6 @@
     <string name="home_label">Home</string>
     <string name="discover_label">Discover</string>
     <string name="video_fetching_popup">Downloading videos…</string>
+    <string name="subscribe_btn">SUBSCRIBE</string>
+    <string name="unsubscribe_btn">UNSUBSCRIBE</string>
 </resources>
