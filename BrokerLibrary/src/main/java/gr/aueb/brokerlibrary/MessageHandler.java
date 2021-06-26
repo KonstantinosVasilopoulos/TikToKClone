@@ -27,6 +27,7 @@ public class MessageHandler implements Runnable {
         }
     }
 
+    @Override
     public void run() {
         try {
             // Receive message and respond accordingly
@@ -124,7 +125,7 @@ public class MessageHandler implements Runnable {
         }
     }
 
-    // Sends other brokers the registredUsers hash map
+    // Sends other brokers the registeredUsers hash map
     private void notifyBrokersOnChanges() {
         try {
             List<String> connectionInfo;
@@ -162,7 +163,7 @@ public class MessageHandler implements Runnable {
 
     private void replyRecommendedChannels() {
         try {
-            // Wait for the channel's name
+            // Wait for the channel's nameZ
             String channelName = input.readUTF();
 
             // Filter the list
@@ -177,7 +178,7 @@ public class MessageHandler implements Runnable {
             // Send list containing channels
             output.writeObject(channels);
             output.flush();
-            System.out.println("Broker " + broker.getHash() + "Sent recommended channels to comsumer.");
+            System.out.println("Broker " + broker.getHash() + ": Sent recommended channels to comsumer.");
 
         } catch (IOException ioe) {
             ioe.printStackTrace();
@@ -301,10 +302,8 @@ public class MessageHandler implements Runnable {
             // Wait for the channel's name
             Object response = input.readObject();
             broker.addRegisteredPublisher((ChannelName) response);
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
-        } catch (ClassNotFoundException ce) {
-            ce.printStackTrace();
         }
     }
 
@@ -342,10 +341,8 @@ public class MessageHandler implements Runnable {
             output.writeBoolean(true);
             output.flush();
 
-        } catch (IOException ioe) {
+        } catch (IOException | ClassNotFoundException ioe) {
             ioe.printStackTrace();
-        } catch (ClassNotFoundException cnfe) {
-            cnfe.printStackTrace();
         }
     }
 
@@ -397,9 +394,11 @@ public class MessageHandler implements Runnable {
 
             // Receive the chunks
             Chunk chunk;
+            int i = 0;  // -2
             while (true) {
                 response = videoInput.readObject();
                 chunk = (Chunk) response;
+                System.out.println(i++);  // -2
 
                 // Save the chunk and send true
                 broker.addChunkToVideo(requestedVideo, chunk);
@@ -417,10 +416,8 @@ public class MessageHandler implements Runnable {
             videoInput.close();
             videoSocket.close();
 
-        } catch (IOException ioe) {
+        } catch (IOException | ClassNotFoundException ioe) {
             ioe.printStackTrace();
-        } catch (ClassNotFoundException cnfe) {
-            cnfe.printStackTrace();
         }
     }
 }

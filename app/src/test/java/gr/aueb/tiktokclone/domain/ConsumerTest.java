@@ -30,8 +30,8 @@ class ConsumerTest {
         // Create 5 publishers and 5 consumers
         Context context = InstrumentationRegistry.getInstrumentation().getContext();
         for (int i = 0; i < 5; i++) {
-            new Publisher("name" + i, "127.0.0.1", 55220 + i, context);
-            consumers.add(new Consumer("name" + i, context));
+            new Publisher("name" + i, "127.0.0.1", 55220 + i);
+            consumers.add(new Consumer("name" + i));
         }
     }
 

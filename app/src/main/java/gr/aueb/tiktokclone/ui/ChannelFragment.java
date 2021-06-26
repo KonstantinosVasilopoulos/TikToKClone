@@ -1,5 +1,6 @@
 package gr.aueb.tiktokclone.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,15 +12,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.google.android.material.snackbar.Snackbar;
-
 import org.jetbrains.annotations.NotNull;
 
-import java.util.List;
-
-import gr.aueb.brokerlibrary.ChannelName;
 import gr.aueb.tiktokclone.R;
-import gr.aueb.tiktokclone.domain.AppNode;
 
 public class ChannelFragment extends Fragment {
 
@@ -66,7 +61,9 @@ public class ChannelFragment extends Fragment {
         channelNameBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Snackbar.make(v, "It worked!", Snackbar.LENGTH_SHORT).show();
+                Intent intent = new Intent(v.getContext(), ChannelActivity.class);
+                intent.putExtra("CHANNEL_NAME", name);
+                startActivity(intent);
             }
         });
     }

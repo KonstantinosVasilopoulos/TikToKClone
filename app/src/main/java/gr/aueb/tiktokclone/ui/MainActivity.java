@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.widget.LinearLayout;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -40,15 +41,25 @@ public class MainActivity extends AppCompatActivity {
 
         // Get the recommended channels
         List<ChannelName> recommendedChannels;
+        assert AppNode.getInstance() != null;
         Consumer consumer = AppNode.getInstance().getConsumer();
         recommendedChannels = consumer.requestRecommendedChannels();
 
         // Create a channel fragment for each recommended channel
+        List<String> displayedChannels = new ArrayList<>();
         for (ChannelName channel : recommendedChannels) {
+            // Do not display duplicates
+            if (displayedChannels.contains(channel.getChannelName()))
+                continue;
+
+            displayedChannels.add(channel.getChannelName());
+
+            // Create the new fragment
             FragmentTransaction ft = fm.beginTransaction();
+            Fragment fragment = new ChannelFragment();
             Bundle args = new Bundle();
             args.putString("CHANNEL_NAME", channel.getChannelName());
-            Fragment fragment = new ChannelFragment();
+            fragment.setArguments(args);
             ft.add(R.id.channelsLayout, fragment);
             ft.commit();
         }

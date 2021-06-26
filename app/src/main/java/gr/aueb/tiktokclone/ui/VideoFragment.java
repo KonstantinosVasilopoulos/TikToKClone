@@ -11,7 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.VideoView;
 
@@ -54,6 +53,7 @@ public class VideoFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             // Find the video's info class
+            assert AppNode.getInstance() != null;
             Consumer consumer = AppNode.getInstance().getConsumer();
             filename = getArguments().getString(ARG_PARAM1);
             for (VideoInfo v : consumer.getDownloadedVideos().keySet()) {
@@ -85,11 +85,19 @@ public class VideoFragment extends Fragment {
 
         // Setup the video player
         videoPlayer = view.findViewById(R.id.videoPlayer);
-        MediaController controller = new MediaController(view.getContext());
-        controller.setAnchorView(videoPlayer);
         Uri uri = Uri.fromFile(video);
         videoPlayer.setVideoURI(uri);
         videoPlayer.requestFocus();
         videoPlayer.start();
+
+        // Add a listener to restart the video when clicked
+        videoPlayer.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                videoPlayer.stopPlayback();
+                videoPlayer.setVideoURI(uri);
+                videoPlayer.start();
+            }
+        });
     }
 }

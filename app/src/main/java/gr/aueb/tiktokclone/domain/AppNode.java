@@ -7,7 +7,6 @@ import android.text.format.Formatter;
 import java.io.File;
 import java.util.List;
 import java.util.Scanner;
-import java.util.concurrent.ExecutionException;
 
 import gr.aueb.brokerlibrary.VideoInfo;
 
@@ -21,16 +20,21 @@ public class AppNode {
     private final Consumer consumer;
     private Scanner in;
 
-    private AppNode(String channelName, String ip, int port, Context context) {
-        publisher = new Publisher(channelName, ip, port, context);
-        consumer = new Consumer(channelName, context);
+    public AppNode(String channelName, String ip, int port, String dir) {
+        publisher = new Publisher(channelName, ip, port, dir);
+        consumer = new Consumer(channelName, dir);
+    }
+
+    private AppNode(String channelName, String ip, int port) {
+        publisher = new Publisher(channelName, ip, port);
+        consumer = new Consumer(channelName);
     }
 
     public static void init(String channelName, Context context) {
         if (instance == null) {
             WifiManager wm = (WifiManager) context.getApplicationContext().getSystemService(WIFI_SERVICE);
             String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
-            instance = new AppNode(channelName, ip, 55220, context);
+            instance = new AppNode(channelName, ip, 55220);
         }
     }
 
@@ -159,11 +163,6 @@ public class AppNode {
         List<VideoInfo> videoList = publisher.requestVideoList(topic);
         for (VideoInfo video : videoList)
             System.out.println("AppNode: " + video.getName() + " - " + video.getFilename());
-    }
-
-    // TODO: For debugging purposes
-    private void setUpDebug() {
-
     }
 
     public Publisher getPublisher() {

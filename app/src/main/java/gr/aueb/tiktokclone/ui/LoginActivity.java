@@ -1,19 +1,21 @@
 package gr.aueb.tiktokclone.ui;
 
-import androidx.appcompat.app.AppCompatActivity;
-
+import android.Manifest;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+
+import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.android.material.snackbar.Snackbar;
 
 import gr.aueb.tiktokclone.R;
 import gr.aueb.tiktokclone.domain.AppNode;
+import gr.aueb.tiktokclone.domain.AppNodeFactory;
 
 public class LoginActivity extends AppCompatActivity {
     EditText loginChannelNameField;
@@ -26,6 +28,9 @@ public class LoginActivity extends AppCompatActivity {
 
         StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(policy);
+
+        // Populate the app with fake accounts(mainly for debugging)
+        new AppNodeFactory().execute(2);
     }
 
     @Override

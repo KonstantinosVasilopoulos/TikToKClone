@@ -2,6 +2,7 @@ package gr.aueb.tiktokclone.domain;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Environment;
 
 import java.math.BigInteger;
 import java.net.Socket;
@@ -39,7 +40,7 @@ public class Consumer implements Node {
 
     private final String DOWNLOADS_DIR;
 
-    public Consumer(String channelName, Context context) {
+    public Consumer(String channelName, String dir) {
         super();
         this.brokers = new HashMap<>();
         this.channelName = channelName;
@@ -47,7 +48,26 @@ public class Consumer implements Node {
         this.downloadedVideos = new HashMap<>();
 
         // Setup directory for downloaded videos
-        DOWNLOADS_DIR = context.getExternalFilesDir("downloads").getAbsolutePath();
+        DOWNLOADS_DIR = dir + "/TikTokClone/downloads/";
+
+        // Register the new user
+        register();
+
+        // Start the timer which monitors the consumer's subscriptions
+        timer = new ConsumerSubscriptionsTimer(this);
+        Thread timerThread = new Thread(timer);
+        timerThread.start();
+    }
+
+    public Consumer(String channelName) {
+        super();
+        this.brokers = new HashMap<>();
+        this.channelName = channelName;
+        this.subscribedTopics = new ArrayList<>();
+        this.downloadedVideos = new HashMap<>();
+
+        // Setup directory for downloaded videos
+        DOWNLOADS_DIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath() + "/TikTokClone/downloads/";
 
         // Register the new user
         register();
@@ -194,9 +214,11 @@ public class Consumer implements Node {
                 ));
 
                 // Receive the chunks
+                int j = 0;  // -2
                 while (true) {
                     response = input.readObject();
                     chunk = (Chunk) response;
+                    System.out.println(j++);  // -2
 
                     // Save the chunk and send true
                     downloadedVideos.get(requestedVideo).add(chunk);

@@ -1,7 +1,7 @@
 package gr.aueb.tiktokclone.domain;
 
 import android.content.Context;
-import android.os.AsyncTask;
+import android.os.Environment;
 
 import java.math.BigInteger;
 import java.net.Socket;
@@ -40,14 +40,31 @@ public class Publisher implements Node {
     private final String VIDEOS_DIR;
     private final String BROKER_IP = "192.168.1.4";
 
-    public Publisher(String channelName, String ip, int port, Context context) {
+    public Publisher(String channelName, String ip, int port, String dir) {
         super();
         this.brokers = new HashMap<>();
         this.channelName = new ChannelName(channelName, ip, port);
         this.savedVideos = new ArrayList<>();
 
         // Setup video storage
-        VIDEOS_DIR = context.getExternalFilesDir("videos/").getAbsolutePath();
+        VIDEOS_DIR = dir + "/TikTokClone/";
+
+        // Get the list containing all brokers
+        getBrokersHashMap();
+
+        // Start the request handler
+        Thread handler = new Thread(new PublisherRequestHandler(port, this));
+        handler.start();
+    }
+
+    public Publisher(String channelName, String ip, int port) {
+        super();
+        this.brokers = new HashMap<>();
+        this.channelName = new ChannelName(channelName, ip, port);
+        this.savedVideos = new ArrayList<>();
+
+        // Setup video storage
+        VIDEOS_DIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath() + "/TikTokClone/";
 
         // Get the list containing all brokers
         getBrokersHashMap();
@@ -184,7 +201,7 @@ public class Publisher implements Node {
         List<Chunk> chunks = new ArrayList<>();
         Chunk chunk;
         int chunkNumber = 0;
-        int chunkSize = 1024;
+        int chunkSize = 163840;  // 20 KB
         int bytesRead;
         byte[] buffer = new byte[chunkSize];
 
