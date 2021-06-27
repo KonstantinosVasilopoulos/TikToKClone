@@ -51,5 +51,15 @@ public class BottomBarFragment extends Fragment {
                 startActivity(intent);
             }
         });
+
+        // Add a listener to the discover button
+        LinearLayout discoverBtn = view.findViewById(R.id.discoverBtn);
+        discoverBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent =  new Intent(view.getContext(), DiscoverActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 }

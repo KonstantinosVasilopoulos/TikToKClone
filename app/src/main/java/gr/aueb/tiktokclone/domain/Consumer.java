@@ -1,7 +1,5 @@
 package gr.aueb.tiktokclone.domain;
 
-import android.content.Context;
-import android.os.AsyncTask;
 import android.os.Environment;
 
 import java.math.BigInteger;

@@ -1,23 +1,21 @@
 package gr.aueb.tiktokclone.domain;
 
-import android.content.Context;
 import android.os.Environment;
 
-import java.math.BigInteger;
-import java.net.Socket;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.IOException;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.math.BigInteger;
+import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
-import java.util.List;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.lang.Thread;
+import java.util.List;
 import java.util.Map;
 
 import gr.aueb.brokerlibrary.ChannelName;
@@ -28,14 +26,14 @@ import gr.aueb.brokerlibrary.VideoInfo;
 public class Publisher implements Node {
     // Keys are hashes and values are lists with IP address and ports
     private Map<String, List<String>> brokers;
-    private ChannelName channelName;
+    private final ChannelName channelName;
     private Socket brokerSocket;
     private ObjectOutputStream output;
     private ObjectInputStream input;
     private PublisherRequestHandler handler;
 
     // Data structures
-    private List<VideoInfo> savedVideos;
+    private final List<VideoInfo> savedVideos;
 
     private final String VIDEOS_DIR;
     private final String BROKER_IP = "192.168.1.4";

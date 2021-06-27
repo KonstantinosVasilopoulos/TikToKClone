@@ -18,7 +18,8 @@
         android:roundIcon="@mipmap/tik_tok_clone_app_icon_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.TikTokClone">
-        <activity android:name=".ui.FollowingActivity"></activity>
+        <activity android:name=".ui.DiscoverActivity"></activity>
+        <activity android:name=".ui.FollowingActivity" />
         <activity android:name=".ui.ChannelActivity" />
         <activity android:name=".ui.MainActivity" />
         <activity android:name=".ui.LoginActivity">

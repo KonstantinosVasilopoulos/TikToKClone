@@ -31,6 +31,7 @@ public class AppNodeFactory extends AsyncTask<Integer, Void, Void> {
 
                 VideoInfo video = new VideoInfo("My kitchen", node.getPublisher().getVideosDir(),
                         "20210626_165606.mp4", username);
+                video.addAssociatedHashtag("myhouse");
                 node.getPublisher().upload(video);
 
             } else  if (i == 1) {

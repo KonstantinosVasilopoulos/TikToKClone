@@ -109,7 +109,7 @@ public class ChannelActivity extends AppCompatActivity {
         assert AppNode.getInstance() != null;
         Consumer consumer = AppNode.getInstance().getConsumer();
         for (VideoInfo v : consumer.getDownloadedVideos().keySet()) {
-            if (mName.equals(v.getChannelName()) && !checkVideoDisplayed(v)) {
+            if (v.getAssociatedHashtags().contains(mName) && !checkVideoDisplayed(v)) {
                 fragment = new VideoFragment();
                 Bundle args = new Bundle();
                 args.putString("VIDEO_FILENAME", v.getFilename());
