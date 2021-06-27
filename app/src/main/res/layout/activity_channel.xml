@@ -5,6 +5,7 @@
     android:id="@+id/channelView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/dark_gray"
     tools:context=".ui.ChannelActivity">
 
     <ScrollView
@@ -43,6 +44,7 @@
                 android:layout_marginBottom="20dp"
                 android:gravity="center"
                 android:text="TextView"
+                android:textColor="@color/red"
                 android:textSize="34sp" />
 
             <Button

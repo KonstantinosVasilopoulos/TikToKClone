@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    tools:context=".ui.ChannelFragment" >
+    android:background="@color/purple"
+    tools:context=".ui.ChannelFragment">
 
     <TextView
         android:id="@+id/channelNameBtn"
@@ -14,5 +15,6 @@
         android:paddingLeft="30dp"
         android:paddingRight="30dp"
         android:text="TextView"
+        android:textColor="@color/black"
         android:textSize="20sp" />
 </FrameLayout>

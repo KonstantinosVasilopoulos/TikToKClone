@@ -5,6 +5,7 @@
     android:id="@+id/UploadView"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/dark_gray"
     tools:context=".ui.UploadActivity">
 
     <ScrollView
@@ -14,8 +15,10 @@
         android:layout_marginBottom="15dp"
         app:layout_constraintBottom_toTopOf="@+id/videoUploadBtn"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0">
 
         <LinearLayout
             android:id="@+id/availableVideosLayout"
@@ -40,6 +43,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/video_name_label"
+                android:textColor="@color/red"
                 android:textSize="20sp" />
 
             <EditText
@@ -48,13 +52,15 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="30dp"
                 android:ems="10"
-                android:inputType="textPersonName" />
+                android:inputType="textPersonName"
+                android:textColor="@color/rose" />
 
             <TextView
                 android:id="@+id/textView8"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/choose_hashtags_label"
+                android:textColor="@color/red"
                 android:textSize="20sp" />
 
             <EditText
@@ -63,7 +69,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="30dp"
                 android:ems="10"
-                android:inputType="textPersonName" />
+                android:inputType="textPersonName"
+                android:textColor="@color/rose" />
 
             <TextView
                 android:id="@+id/textView7"
@@ -71,6 +78,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="30dp"
                 android:text="@string/choose_video_label"
+                android:textColor="@color/red"
                 android:textSize="20sp" />
 
         </LinearLayout>

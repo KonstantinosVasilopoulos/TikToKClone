@@ -2,26 +2,26 @@ package gr.aueb.tiktokclone.domain;
 
 import android.os.Environment;
 
-import java.math.BigInteger;
-import java.net.Socket;
-import java.io.ObjectOutputStream;
-import java.io.ObjectInputStream;
-import java.io.IOException;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.math.BigInteger;
+import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Collections;
-import java.util.List;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import gr.aueb.brokerlibrary.ChannelName;
 import gr.aueb.brokerlibrary.Chunk;
-import gr.aueb.brokerlibrary.VideoInfo;
 import gr.aueb.brokerlibrary.Node;
+import gr.aueb.brokerlibrary.VideoInfo;
 
 public class Consumer implements Node {
     // Keys are hashes and values are lists with IP address and ports
@@ -66,6 +66,7 @@ public class Consumer implements Node {
 
         // Setup directory for downloaded videos
         DOWNLOADS_DIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath() + "/TikTokClone/downloads/";
+        new File(DOWNLOADS_DIR).mkdirs();
 
         // Register the new user
         register();

@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import gr.aueb.brokerlibrary.BrokerFactory;
 import gr.aueb.brokerlibrary.ChannelName;
 import gr.aueb.brokerlibrary.Chunk;
 import gr.aueb.brokerlibrary.Node;
@@ -36,7 +37,7 @@ public class Publisher implements Node {
     private final List<VideoInfo> savedVideos;
 
     private final String VIDEOS_DIR;
-    private final String BROKER_IP = "192.168.1.4";
+    private final String BROKER_IP = BrokerFactory.getIP_ADDRESS();
 
     public Publisher(String channelName, String ip, int port, String dir) {
         super();
@@ -63,6 +64,7 @@ public class Publisher implements Node {
 
         // Setup video storage
         VIDEOS_DIR = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).getAbsolutePath() + "/TikTokClone/";
+        new File(VIDEOS_DIR).mkdirs();
 
         // Get the list containing all brokers
         getBrokersHashMap();
