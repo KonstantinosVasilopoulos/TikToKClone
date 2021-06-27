@@ -1,11 +1,8 @@
 package gr.aueb.tiktokclone.ui;
 
-import android.Manifest;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.StrictMode;
-import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
@@ -42,9 +39,7 @@ public class LoginActivity extends AppCompatActivity {
         loginBtn = findViewById(R.id.loginBtn);
 
         // Add a listener to the button for logging in
-        loginBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        loginBtn.setOnClickListener(v -> {
                 // Get the text from the field
                 String channelName = loginChannelNameField.getText().toString();
 
@@ -62,7 +57,6 @@ public class LoginActivity extends AppCompatActivity {
                             R.string.login_error,
                             Snackbar.LENGTH_SHORT).show();
                 }
-            }
         });
     }
 }

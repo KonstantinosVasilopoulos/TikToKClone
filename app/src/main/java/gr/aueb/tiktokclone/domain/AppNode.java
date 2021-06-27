@@ -128,7 +128,7 @@ public class AppNode {
         String videoName = in.nextLine();
 
         // Get the hashtags for the video
-        VideoInfo video = new VideoInfo(videoName, publisher.getVideosDir(), filename, publisher.getChannelName().getChannelName());
+        VideoInfo video = new VideoInfo(videoName, filename, publisher.getChannelName().getChannelName());
         String hashtag;
         do {
             System.out.println("AppNode: Give one hashtag or \"done\" to upload: ");

@@ -194,7 +194,10 @@ public class Publisher implements Node {
     public List<Chunk> generateChunks(String filename) {
         // Make sure the file given exists
         File file = new File(VIDEOS_DIR, filename);
-        if (!file.exists()) return null;
+        if (!file.exists()) {
+            file = new File(filename);
+            if (!file.exists()) return null;
+        }
 
         List<Chunk> chunks = new ArrayList<>();
         Chunk chunk;

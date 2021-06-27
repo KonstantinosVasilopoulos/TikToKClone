@@ -25,12 +25,10 @@ public class AppNodeFactory extends AsyncTask<Integer, Void, Void> {
             if (i == 0) {
                 username = "syntakas.alex";
                 node = new AppNode(username, IP_ADDRESS, port + i, DIR);
-//                VideoInfo video = new VideoInfo("Acropolis", node.getPublisher().getVideosDir(),
-//                        "20210626_135646.mp4", username);
+//                VideoInfo video = new VideoInfo("Acropolis", "20210626_135646.mp4", username);
 //                node.getPublisher().upload(video);
 
-                VideoInfo video = new VideoInfo("My kitchen", node.getPublisher().getVideosDir(),
-                        "20210626_165606.mp4", username);
+                VideoInfo video = new VideoInfo("My kitchen", "20210626_165606.mp4", username);
                 video.addAssociatedHashtag("myhouse");
                 node.getPublisher().upload(video);
 

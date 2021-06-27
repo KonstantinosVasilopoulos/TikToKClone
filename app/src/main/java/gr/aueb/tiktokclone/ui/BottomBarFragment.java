@@ -10,6 +10,7 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import org.jetbrains.annotations.NotNull;
@@ -22,7 +23,7 @@ public class BottomBarFragment extends Fragment {
         // Required empty public constructor
     }
 
-    public static BottomBarFragment newInstance(String param1, String param2) {
+    public static BottomBarFragment newInstance() {
         return new BottomBarFragment();
     }
 
@@ -44,22 +45,23 @@ public class BottomBarFragment extends Fragment {
 
         // Add a listener to the home button
         LinearLayout homeBtn = view.findViewById(R.id.homeBtn);
-        homeBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(view.getContext(), MainActivity.class);
-                startActivity(intent);
-            }
+        homeBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(view.getContext(), MainActivity.class);
+            startActivity(intent);
+        });
+
+        // Add a listener to the upload button
+        ImageButton uploadBtn = view.findViewById(R.id.uploadBtn);
+        uploadBtn.setOnClickListener(v -> {
+            Intent intent = new Intent(v.getContext(), UploadActivity.class);
+            startActivity(intent);
         });
 
         // Add a listener to the discover button
         LinearLayout discoverBtn = view.findViewById(R.id.discoverBtn);
-        discoverBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent =  new Intent(view.getContext(), DiscoverActivity.class);
-                startActivity(intent);
-            }
+        discoverBtn.setOnClickListener(v -> {
+            Intent intent =  new Intent(view.getContext(), DiscoverActivity.class);
+            startActivity(intent);
         });
     }
 }

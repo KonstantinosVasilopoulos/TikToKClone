@@ -401,9 +401,14 @@ public class MessageHandler implements Runnable {
             Chunk chunk;
             int i = 0;  // -2
             while (true) {
-                response = videoInput.readObject();
-                chunk = (Chunk) response;
-                System.out.println(i++);  // -2
+                try {
+                    response = videoInput.readObject();
+                    chunk = (Chunk) response;
+                    System.out.println(i++);  // -2
+
+                } catch (IOException ioe) {
+                    continue;
+                }
 
                 // Save the chunk and send true
                 broker.addChunkToVideo(requestedVideo, chunk);

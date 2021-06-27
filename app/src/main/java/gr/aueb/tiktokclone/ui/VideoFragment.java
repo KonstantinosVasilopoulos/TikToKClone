@@ -88,6 +88,7 @@ public class VideoFragment extends Fragment {
         Uri uri = Uri.fromFile(video);
         videoPlayer.setVideoURI(uri);
         videoPlayer.requestFocus();
+        videoPlayer.start();
 
         // Add a listener to restart the video when clicked
         videoPlayer.setOnClickListener(new View.OnClickListener() {

@@ -18,4 +18,10 @@
     <string name="unsubscribe_btn">UNSUBSCRIBE</string>
     <string name="discover_prompt">Discover new awesome videos!</string>
     <string name="search_error">Please enter a topic!</string>
+    <string name="video_name_label">Name your video</string>
+    <string name="choose_video_label">Choose your new video</string>
+    <string name="upload_btn">UPLOAD</string>
+    <string name="choose_hashtags_label">Choose your video\'s hashtags</string>
+    <string name="name_error">Give your video a name!</string>
+    <string name="no_video_chosen_error">Please choose a video to upload!</string>
 </resources>

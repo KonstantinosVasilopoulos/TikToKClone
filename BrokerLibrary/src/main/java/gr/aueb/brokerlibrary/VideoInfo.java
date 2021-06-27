@@ -5,38 +5,20 @@ import java.util.List;
 import java.util.ArrayList;
 
 public class VideoInfo implements Serializable {
-    private String name;
-    private String filename;
-    private String channelName;
+    private final String name;
+    private final String filename;
+    private final String channelName;
     private String dateCreated;
     private String frameRate;
     private String frameWidth;
     private String frameHeight;
     private List<String> associatedHashtags;
     
-    public VideoInfo(String name, String videosDir, String filename, String channelName) {
+    public VideoInfo(String name, String filename, String channelName) {
         this.name = name;
         this.filename = filename;
         this.channelName = channelName;
         this.associatedHashtags = new ArrayList<>();
-
-//        try {
-//            // Use TIKA to get the video's metadata
-//            BodyContentHandler handler = new BodyContentHandler();
-//            Metadata metadata = new Metadata();
-//            FileInputStream inputstream = new FileInputStream(new File(videosDir, filename));
-//            ParseContext pcontext = new ParseContext();
-//            MP4Parser MP4Parser = new MP4Parser();
-//            MP4Parser.parse(inputstream, handler, metadata, pcontext);
-//
-//            dateCreated = metadata.get("meta:creation-date");
-//            // frameRate = metadata.get("framerate");
-//            frameWidth = metadata.get("tiff:ImageWidth");
-//            frameHeight = metadata.get("tiff:ImageLength");
-//
-//        } catch (IOException | SAXException | TikaException e) {
-//            e.printStackTrace();
-//        }
 
         // The channel's name is a topic for the video
         this.associatedHashtags.add(channelName);
